@@ -4,5 +4,6 @@ Test_*_Runner.c
 build/
 crosstool-ng
 aesd-build
+.idea
 .vscode/
 test.sh.log
