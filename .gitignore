@@ -7,3 +7,4 @@ aesd-build
 .idea
 .vscode/
 test.sh.log
+cmake-build-debug
