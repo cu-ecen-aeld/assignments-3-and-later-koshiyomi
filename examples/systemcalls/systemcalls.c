@@ -16,7 +16,9 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-
+    if (system(cmd)){
+        return false;
+    }
     return true;
 }
 
@@ -58,10 +60,26 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-
+    int ret = 0;
     va_end(args);
+    pid_t pid = fork();
 
-    return true;
+    if (pid == -1){
+        ret = -1;
+    }else if (pid == 0){
+        execv(command[0], command);
+        perror("execv");
+        exit(-1);
+    }
+
+    int status;
+    if (waitpid(pid, &status, 0)){
+        ret = -1;
+    }
+    if (WIFEXITED(status)){
+        ret = WEXITSTATUS(status);
+    }
+    return ret == 0;
 }
 
 /**
@@ -95,5 +113,28 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
     va_end(args);
 
-    return true;
+    int kidpid;
+    int ret = -1;
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    if (fd < 0) { perror("open"); ret = -1; }
+    switch (kidpid = fork()) {
+        case -1: perror("fork"); ret = -1;
+        case 0:
+            if (dup2(fd, 1) < 0) { perror("dup2"); ret = -1; }
+            close(fd);
+            execv(command[0], command); perror("execv"); ret = -1;
+        default:
+            close(fd);
+            /* do whatever the parent wants to do. */
+    }
+
+    int status;
+    if (waitpid(kidpid, &status, 0)){
+        ret = -1;
+    }
+    if (WIFEXITED(status)){
+        ret = WEXITSTATUS(status);
+    }
+
+    return ret == 0;
 }
