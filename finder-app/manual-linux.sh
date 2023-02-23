@@ -34,7 +34,17 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     echo "Checking out version ${KERNEL_VERSION}"
     git checkout ${KERNEL_VERSION}
 
-    # TODO: Add your kernel build steps here
+    echo "Deep clean kernel build tree"
+    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- mrproper
+    echo "Config arm dev board as simulation in QEMU"
+    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- defconfig
+    echo "Build a kernel image for booting with QEMU"
+    make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- all
+    echo "Build kernel modules"
+    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- modules
+    echo "Build the devicetree"
+    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- dtbs
+
 fi
 
 echo "Adding the Image in outdir"
