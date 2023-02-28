@@ -5,6 +5,9 @@
 set -e
 set -u
 
+echo "current dir"
+pwd
+
 NUMFILES=10
 WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
