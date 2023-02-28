@@ -1,7 +1,6 @@
 .MAIN:writer
 
-all:
-	writer
+all:writer
 
 writer:
 	$(CROSS_COMPILE)$(CC) -c writer.c -o writer
